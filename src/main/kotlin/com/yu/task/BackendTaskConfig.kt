@@ -19,7 +19,7 @@ open class BackendTaskConfig {
     open fun novelSpiderTaskManager(): TaskManagerFactory {
         val task = novelSpiderTask()
 
-        val taskManager = TaskManagerFactory(task, 0 , 30, TimeUnit.SECONDS)
+        val taskManager = TaskManagerFactory(task, 0 , 1, TimeUnit.MINUTES)
 
         return taskManager
     }

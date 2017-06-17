@@ -41,6 +41,13 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver
     compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.4.2'
+
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-aop
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: '1.5.3.RELEASE'
+
+    // https://mvnrepository.com/artifact/org.litote.kmongo/kmongo
+    compile group: 'org.litote.kmongo', name: 'kmongo', version: '3.3.5'
+
     testCompile 'junit:junit'
 }
 
@@ -49,5 +56,5 @@ task wrapper(type: Wrapper) {
 }
 
 springBoot {
-    mainClass = 'org.jetbrains.kotlin.demo.Application'
+    mainClass = 'com.yu.Application'
 }
