@@ -5,10 +5,11 @@ import com.yu.domain.model.Novel
 import com.yu.domain.model.NovelStatus
 import com.yu.repository.ChapterDao
 import com.yu.repository.NovelDao
-import jdk.nashorn.internal.runtime.regexp.joni.Config.log
 import org.jsoup.nodes.Element
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import org.springframework.util.StopWatch
 import java.util.*
 
 /**
@@ -20,6 +21,7 @@ open class NovelSpiderHandler {
     @Autowired private lateinit var spiderNet: SpiderNet
     @Autowired private lateinit var chapterDao: ChapterDao
     @Autowired lateinit var noveldao: NovelDao
+    private val log = LoggerFactory.getLogger(NovelSpiderHandler::class.java)
 
     fun crawlChapters(novel: Novel) {
         if (novel.status == NovelStatus.DONE) {
@@ -28,25 +30,29 @@ open class NovelSpiderHandler {
 
         val links = spiderNet.crawlChapters(novel.host + novel.link)
 
-        log.println(links.size)
+        log.info("found link count {}", links.size)
         val unSavedChapters = filterUnSavedChapter(links, novel.latestChapterName)
-        log.println(unSavedChapters.size)
+        log.info("unCrawled link count {}", unSavedChapters.size)
 
         unSavedChapters.forEach { item ->
+            val stopWatch = StopWatch()
+            stopWatch.start()
             val chapter = Chapter()
             chapter.link = item.attr("href")
             chapter.name = item.text()
             chapter.novel = novel
 
             if (chapter.link?.commonPrefixWith(novel.link!!, true).equals(novel.link)) {
-                log.println(chapter.name + "   --- " + chapter.link)
-                spiderNet.getChapterContent(novel.host + chapter.link)
+                chapter.content = spiderNet.getChapterContent(novel.host + chapter.link)
                 chapterDao.save(chapter)
                 novel.latestChapterName = chapter.name
                 noveldao.save(novel)
             } else {
-                log.println("skip" + chapter.name + " --- " + chapter.link)
+                log.info("skip" + chapter.name + " --- " + chapter.link)
             }
+
+            stopWatch.stop()
+            log.info("chapter {} , cost time {}", chapter.name, stopWatch.totalTimeMillis)
         }
     }
 
@@ -57,8 +63,8 @@ open class NovelSpiderHandler {
 
         var chapter = chapters[0]
 
-        while (chapter.text() != latestChapterName) {
-            log.println(chapter.text())
+        while (chapter.text() != latestChapterName && chapters.size > 1) {
+            log.info("already saved chapter {}.", chapter.text())
             chapters.remove(chapter)
             chapter = chapters[0]
         }

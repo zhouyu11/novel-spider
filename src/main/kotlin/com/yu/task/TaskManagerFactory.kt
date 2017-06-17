@@ -35,8 +35,7 @@ open class TaskManagerFactory(val task: Runnable, val initialDelay: Long, val de
     }
 
     override fun start() {
-        future = threadPoolExecutor!!.scheduleWithFixedDelay(task, initialDelay, delay, timeUnit)
-        log.println("task start.")
+        future = threadPoolExecutor!!.scheduleAtFixedRate(task, initialDelay, delay, timeUnit)
     }
 
     override fun isAutoStartup(): Boolean {

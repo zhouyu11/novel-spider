@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import org.springframework.util.StopWatch
 import java.util.*
 import java.util.stream.Collectors
 
@@ -15,17 +17,23 @@ import java.util.stream.Collectors
 @Component
 @Slf4j
 open class SpiderNet {
+    private val log = LoggerFactory.getLogger(SpiderNet::class.java)
     open fun crawlChapters(link: String?): List<Element> {
+        val stopWatch = StopWatch()
+        stopWatch.start()
         var document: Document? = null
         while (document == null) {
             document = crawlPage(link)
         }
 
-        val collect = document.select("a").stream()
+        val elements = document.select("a")
+        val collect = elements.stream()
                 .filter { item ->
                     item.attr("href").contains(".html") && item.text().contains("章") && item.text().contains("第")
                 }.collect(Collectors.toList())
         Collections.reverse(collect)
+        stopWatch.stop()
+        log.info("link {} , cost time {}", link, stopWatch.totalTimeMillis)
         return collect
     }
 
@@ -34,7 +42,7 @@ open class SpiderNet {
         try {
             document = Jsoup.connect(link).get()
         } catch (exception: Exception) {
-            log.println("get $link failed.")
+            log.info("get $link failed.")
         }
         return document
     }
@@ -49,7 +57,7 @@ open class SpiderNet {
                         .text()
 
             } catch (e: Exception) {
-                log.println("get $link failed.")
+                log.info("get $link failed.")
             }
         }
         return content
