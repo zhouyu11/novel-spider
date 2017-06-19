@@ -48,11 +48,11 @@ open class NovelSpiderHandler {
                 novel.latestChapterName = chapter.name
                 noveldao.save(novel)
             } else {
-                log.info("skip" + chapter.name + " --- " + chapter.link)
+                log.info("skip {} " + chapter.name + " --- " + chapter.link, novel.name)
             }
 
             stopWatch.stop()
-            log.info("chapter {} , cost time {}", chapter.name, stopWatch.totalTimeMillis)
+            log.info("{} - {} ,{}ms", novel.name, chapter.name, stopWatch.totalTimeMillis)
         }
     }
 
@@ -64,7 +64,6 @@ open class NovelSpiderHandler {
         var chapter = chapters[0]
 
         while (chapter.text() != latestChapterName && chapters.size > 1) {
-            log.info("already saved chapter {}.", chapter.text())
             chapters.remove(chapter)
             chapter = chapters[0]
         }
