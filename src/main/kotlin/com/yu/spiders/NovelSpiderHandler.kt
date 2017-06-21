@@ -69,7 +69,9 @@ open class NovelSpiderHandler {
         }
         while (chapter.text() == latestChapterName && chapters.size > 1) {
             chapters.remove(chapter)
+            chapter = chapters[0]
         }
+
         return chapters
     }
 }
